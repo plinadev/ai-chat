@@ -73,18 +73,28 @@ export class FilesService {
 
     await file.save();
 
-    await this.startProcessingWorkflow({
-      fileId: file._id.toString(),
-      userEmail,
-      bucket,
-      key: s3Filename,
-      filename: originalFilename,
-    });
     return {
       uploadUrl,
       s3Filename,
       fileId: file._id,
     };
+  }
+
+  async startProcessing(fileId: string, userEmail: string) {
+    const file = await this.fileModel.findById(fileId);
+    if (!file || file.userEmail !== userEmail) {
+      throw new NotFoundException('File not found or not owned by user');
+    }
+
+    await this.startProcessingWorkflow({
+      fileId,
+      userEmail,
+      bucket: process.env.AWS_S3_BUCKET,
+      key: file.s3Filename,
+      filename: file.userFilename,
+    });
+
+    return { started: true };
   }
 
   async getFileByEmail(userEmail: string) {
@@ -112,7 +122,7 @@ export class FilesService {
     try {
       const index = this.pinecone.index('ai-chat-index');
       await index.deleteMany({
-        filter: { fileId },
+        fileId,
       });
       this.logger.log(`Deleted vectors from Pinecone for file ${fileId}`);
     } catch (error) {

@@ -87,3 +87,25 @@ export const deleteFile = async ({
     throw error;
   }
 };
+
+export const startProcessing = async ({
+  fileId,
+  userEmail,
+}: {
+  fileId: string;
+  userEmail: string;
+}) => {
+  try {
+    const response = await apiClient.post("/files/start-processing", {
+      fileId,
+      userEmail,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(
+      "Error starting processing:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};

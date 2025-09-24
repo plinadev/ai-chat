@@ -14,6 +14,10 @@ export class FilesController {
       body.originalFilename,
     );
   }
+  @Post('start-processing')
+  async startProcessing(@Body() body: { fileId: string; userEmail: string }) {
+    return this.filesService.startProcessing(body.fileId, body.userEmail);
+  }
 
   @Get()
   async getFile(@Query('userEmail') userEmail: string) {
