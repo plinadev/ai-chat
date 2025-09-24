@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { FilesService } from './files.service';
 
 @Controller('files')
@@ -18,6 +18,13 @@ export class FilesController {
   @Get()
   async getFile(@Query('userEmail') userEmail: string) {
     return this.filesService.getFileByEmail(userEmail);
+  }
+  @Delete()
+  async deleteFile(
+    @Query('fileId') fileId: string,
+    @Query('userEmail') userEmail: string,
+  ) {
+    return this.filesService.deleteFile(fileId, userEmail);
   }
   @Get('/status')
   async getFileStatus(@Query('userEmail') userEmail: string) {

@@ -1,5 +1,5 @@
 export type File = {
-  id: string;
+  _id: string;
   userFilename: string;
   status: "pending" | "success" | "error";
   s3Filename: string;

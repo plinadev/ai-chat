@@ -64,3 +64,26 @@ export const getFileStatus = async ({ userEmail }: { userEmail: string }) => {
     throw error;
   }
 };
+
+export const deleteFile = async ({
+  fileId,
+  userEmail,
+}: {
+  fileId: string;
+  userEmail: string;
+}) => {
+  try {
+    const params = new URLSearchParams();
+    params.append("fileId", fileId);
+    params.append("userEmail", userEmail);
+
+    const response = await apiClient.delete(`/files?${params.toString()}`);
+    return response;
+  } catch (error: any) {
+    console.error(
+      "Error deleting file ",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};

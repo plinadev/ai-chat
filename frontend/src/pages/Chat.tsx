@@ -16,6 +16,7 @@ import FileErrorAnimation from "../components/FileErrorAnimation";
 import EmptyChatAnimation from "../components/EmptyChatAnimation";
 import PageLoader from "../components/PageLoader";
 import { useStatus } from "../hooks/useStatus";
+import { useDeleteFile } from "../hooks/useDeleteFile";
 
 interface Message {
   id: string;
@@ -25,9 +26,11 @@ interface Message {
 }
 
 function Chat() {
+  useStatus();
+  const userEmail = localStorage.getItem("userEmail")!;
   const { file, isFetching } = useFile();
   const { selectFile, isProcessing } = useSelectFile();
-  const { status, isFetching: isFetchingStatus } = useStatus();
+  const { deleteFile, isDeleting } = useDeleteFile();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -69,11 +72,6 @@ function Chat() {
     if (files?.length) handleFileSelect(files[0]);
   };
 
-  const removeFile = () => {
-    setMessages([]);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   return (
     <Layout>
       <div className="w-full h-screen p-10 flex flex-col">
@@ -94,7 +92,7 @@ function Chat() {
 
           {/* Main content */}
           <div className="h-full flex flex-col overflow-hidden">
-            {isFetching ? (
+            {isFetching || isDeleting ? (
               <PageLoader />
             ) : (
               <>
@@ -161,7 +159,9 @@ function Chat() {
                         file.status === "error") && (
                         <button
                           className="btn btn-ghost btn-sm btn-circle text-accent hover:text-white hover:bg-primary"
-                          onClick={removeFile}
+                          onClick={() =>
+                            deleteFile({ fileId: file._id, userEmail })
+                          }
                           title="Remove file"
                         >
                           <IoClose size={18} />
