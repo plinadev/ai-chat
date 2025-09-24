@@ -39,11 +39,26 @@ export const getFile = async ({ userEmail }: { userEmail: string }) => {
     const params = new URLSearchParams();
     params.append("userEmail", userEmail);
     const response = await apiClient.get(`/files?${params.toString()}`);
-    console.log(response)
-    return (response.data as FileType) ;
+
+    return response.data as FileType;
   } catch (error: any) {
     console.error(
       "Error fetching file:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const getFileStatus = async ({ userEmail }: { userEmail: string }) => {
+  try {
+    const params = new URLSearchParams();
+    params.append("userEmail", userEmail);
+    const response = await apiClient.get(`/files/status?${params.toString()}`);
+    return response.data as string;
+  } catch (error: any) {
+    console.error(
+      "Error fetching status:",
       error.response?.data || error.message
     );
     throw error;

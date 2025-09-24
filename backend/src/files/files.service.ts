@@ -76,6 +76,14 @@ export class FilesService {
   async getFileByEmail(userEmail: string) {
     return this.fileModel.findOne({ userEmail }).sort({ createdAt: -1 }).lean();
   }
+  async getFileStatusByEmail(userEmail: string) {
+    const file = await this.fileModel
+      .findOne({ userEmail })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return file?.status;
+  }
 
   private async startProcessingWorkflow(input: Record<string, any>) {
     const stateMachineArn = process.env.STEP_FUNCTION_ARN;

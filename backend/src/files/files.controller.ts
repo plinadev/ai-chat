@@ -19,4 +19,8 @@ export class FilesController {
   async getFile(@Query('userEmail') userEmail: string) {
     return this.filesService.getFileByEmail(userEmail);
   }
+  @Get('/status')
+  async getFileStatus(@Query('userEmail') userEmail: string) {
+    return this.filesService.getFileStatusByEmail(userEmail);
+  }
 }

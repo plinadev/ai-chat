@@ -12,7 +12,8 @@ export const useSelectFile = () => {
 
   const { mutate: selectFile, isPending: isProcessing } = useMutation({
     mutationFn: async ({ file, userEmail }: SelectFilePayload) => {
-      // get pre-signed URL and document metadata
+      toast.success("Wait for a few seconds for processing to start!");
+
       const { uploadUrl, fileId } = await generateUploadUrl({
         userEmail,
         originalFilename: file.name,
@@ -24,9 +25,11 @@ export const useSelectFile = () => {
       return { fileId, userEmail };
     },
     onSuccess: ({ userEmail }) => {
-      toast.success("File processing has successfully started!");
       queryClient.invalidateQueries({
         queryKey: ["file", userEmail],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["status", userEmail],
       });
     },
     onError: () => {
