@@ -8,10 +8,12 @@ import { File } from './schemas/files.schema';
 import { Model } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 
 @Injectable()
 export class FilesService {
   private s3: S3Client;
+  private sfn: SFNClient;
   private logger = new Logger(FilesService.name);
   private userStreams: Record<string, Subject<any>> = {};
   constructor(
@@ -19,6 +21,14 @@ export class FilesService {
     private fileModel: Model<File>,
   ) {
     this.s3 = new S3Client({
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
+
+    this.sfn = new SFNClient({
       region: process.env.AWS_REGION,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
@@ -49,6 +59,13 @@ export class FilesService {
 
     await file.save();
 
+    await this.startProcessingWorkflow({
+      fileId: file._id.toString(),
+      userEmail,
+      bucket,
+      key: s3Filename,
+      filename: originalFilename,
+    });
     return {
       uploadUrl,
       s3Filename,
@@ -58,5 +75,31 @@ export class FilesService {
 
   async getFileByEmail(userEmail: string) {
     return this.fileModel.findOne({ userEmail }).sort({ createdAt: -1 }).lean();
+  }
+
+  private async startProcessingWorkflow(input: Record<string, any>) {
+    const stateMachineArn = process.env.STEP_FUNCTION_ARN;
+    if (!stateMachineArn) {
+      this.logger.error('STEP_FUNCTION_ARN not set');
+      return;
+    }
+
+    try {
+      const command = new StartExecutionCommand({
+        stateMachineArn,
+        input: JSON.stringify(input),
+      });
+
+      const res = await this.sfn.send(command);
+      this.logger.log(`Started Step Function execution: ${res.executionArn}`);
+    } catch (err) {
+      this.logger.error('Failed to start Step Function', err as any);
+
+      if (input.fileId) {
+        await this.fileModel.findByIdAndUpdate(input.fileId, {
+          status: 'error',
+        });
+      }
+    }
   }
 }
