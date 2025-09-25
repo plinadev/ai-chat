@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { Chat } from 'src/chat/schemas/chat.schema';
 
 @Injectable()
 export class FilesService {
@@ -30,6 +31,8 @@ export class FilesService {
   constructor(
     @InjectModel(File.name)
     private fileModel: Model<File>,
+    @InjectModel(Chat.name)
+    private chatModel: Model<Chat>,
   ) {
     this.s3 = new S3Client({
       region: process.env.AWS_REGION,
@@ -119,6 +122,7 @@ export class FilesService {
       throw new ForbiddenException('You are not allowed to delete this file');
     }
 
+    //delete from pinecone
     try {
       const index = this.pinecone.index('ai-chat-index');
       await index.deleteMany({
@@ -128,7 +132,7 @@ export class FilesService {
     } catch (error) {
       this.logger.error('Failed to delete vectors from Pinecone', error);
     }
-
+    //delete from s3
     try {
       const bucket = process.env.AWS_S3_BUCKET!;
       const command = new DeleteObjectCommand({
@@ -141,6 +145,16 @@ export class FilesService {
       this.logger.error('Failed to delete file from S3', error);
     }
 
+    //delete chat history
+    try {
+      // Delete all chat messages related to this file and user
+      await this.chatModel.deleteMany({ fileId, userEmail });
+      this.logger.log(`Deleted chat messages from MongoDB for file ${fileId}`);
+    } catch (error) {
+      this.logger.error('Failed to delete chat messages from MongoDB', error);
+    }
+
+    //delete from mongodb
     await this.fileModel.deleteOne({ _id: fileId });
     this.logger.log(`Deleted file document ${fileId} from MongoDB`);
 

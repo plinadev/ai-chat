@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import type { File as FileType } from "../types";
-import { getFile } from "../services/fileService";
+import type { File as FileType } from "../../types";
+import { getFile } from "../../services/fileService";
 
 export const useFile = () => {
   const userEmail = localStorage.getItem("userEmail");

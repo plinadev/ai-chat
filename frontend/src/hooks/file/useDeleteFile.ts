@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { deleteFile as deleteFileApi } from "../services/fileService";
+import { deleteFile as deleteFileApi } from "../../services/fileService";
 
 export const useDeleteFile = () => {
   const queryClient = useQueryClient();
 
   const { mutate: deleteFile, isPending: isDeleting } = useMutation({
+    mutationKey: ["deleteFile"],
     mutationFn: deleteFileApi,
     onSuccess: () => {
-      toast.success("File was successfully removed!");
       queryClient.invalidateQueries({ queryKey: ["file"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["status"], exact: false });
     },

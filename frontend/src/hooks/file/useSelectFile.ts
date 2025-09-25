@@ -4,7 +4,7 @@ import {
   generateUploadUrl,
   uploadFileToS3,
   startProcessing,
-} from "../services/fileService";
+} from "../../services/fileService";
 
 interface SelectFilePayload {
   file: File;
@@ -15,6 +15,7 @@ export const useSelectFile = () => {
   const queryClient = useQueryClient();
 
   const { mutate: selectFile, isPending: isProcessing } = useMutation({
+    mutationKey: ["selectFile"],
     mutationFn: async ({ file, userEmail }: SelectFilePayload) => {
       toast("Wait for a few seconds for processing to start...");
 

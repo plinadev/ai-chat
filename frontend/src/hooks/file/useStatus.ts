@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { getFileStatus } from "../services/fileService";
+import { getFileStatus } from "../../services/fileService";
 
 export const useStatus = () => {
   const userEmail = localStorage.getItem("userEmail");
