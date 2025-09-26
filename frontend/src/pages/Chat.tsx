@@ -1,11 +1,9 @@
 import Layout from "../components/layout/Layout";
-import { useSelectFile } from "../hooks/file/useSelectFile";
 import { useFile } from "../hooks/file/useFile";
 import FileLoader from "../components/FileLoader";
 import FileErrorAnimation from "../components/FileErrorAnimation";
 import PageLoader from "../components/PageLoader";
 import { useStatus } from "../hooks/file/useStatus";
-import { useDeleteFile } from "../hooks/file/useDeleteFile";
 import { useChat } from "../hooks/chat/useChat";
 import Conversation from "../components/chat/Conversation";
 import NavBar from "../components/NavBar";
