@@ -11,6 +11,7 @@ export const useDeleteFile = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["file"], exact: false });
       queryClient.invalidateQueries({ queryKey: ["status"], exact: false });
+      queryClient.invalidateQueries({ queryKey: ["chat"] });
     },
     onError: () => {
       toast.error(
