@@ -124,7 +124,7 @@ export class FilesService {
 
     //delete from pinecone
     try {
-      const index = this.pinecone.index('ai-chat-index');
+      const index = this.pinecone.index(process.env.PINECONE_INDEX!);
       await index.deleteMany({
         fileId,
       });

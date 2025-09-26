@@ -23,7 +23,7 @@ export class ChatService {
     const questionVector = embeddingRes.data[0].embedding;
 
     //2. Query Pinecone
-    const index = this.pinecone.index('ai-chat-index');
+    const index = this.pinecone.index(process.env.PINECONE_INDEX!);
     const queryRes = await index.query({
       vector: questionVector,
       topK: 5,
